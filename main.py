@@ -1,8 +1,21 @@
 from fastapi import FastAPI, HTTPException
 from pydantic import BaseModel
+from fastapi.security import APIKeyHeader
+from fastapi import Depends
 import asyncpg
 
 app = FastAPI(title="Clínica NovaVita")
+
+API_KEY = "123456"
+api_key_header = APIKeyHeader(name="x-api-key")
+
+def test_api(api_key: str = Depends(api_key_header)):
+    if api_key != API_KEY:
+        raise HTTPException(
+            status_code=401,
+            detail="API Key inválida"
+        )
+    return True
 
 class Paciente(BaseModel):
     nome: str
@@ -15,13 +28,12 @@ async def get_conn():
         user='postgres', 
         password='12345', 
         database='postgres', 
-        host='127.0.0.1'
+        host='localhost'
     )
 
 @app.get("/")
 def home():
     return {"status": "API Clínica NovaVita Rodando"}
-
 
 @app.post("/items")
 async def criar(p: Paciente):
