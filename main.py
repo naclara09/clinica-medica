@@ -4,18 +4,16 @@ import asyncpg
 
 app = FastAPI(title="Clínica NovaVita")
 
-# Modelo para o Pydantic (Requisito do trabalho)
 class Paciente(BaseModel):
     nome: str
     cpf: str
     telefone: str
     historico: str
 
-# Função para conectar ao banco do DBeaver
 async def get_conn():
     return await asyncpg.connect(
         user='postgres', 
-        password='SUA_SENHA', # <--- COLOQUE A SENHA QUE VC USA NO DBEAVER
+        password='12345', 
         database='postgres', 
         host='127.0.0.1'
     )
@@ -24,7 +22,7 @@ async def get_conn():
 def home():
     return {"status": "API Clínica NovaVita Rodando"}
 
-# CREATE - POST /items
+
 @app.post("/items")
 async def criar(p: Paciente):
     conn = await get_conn()
@@ -33,7 +31,6 @@ async def criar(p: Paciente):
     await conn.close()
     return {"msg": "Cadastrado!"}
 
-# READ (Lista) - GET /items
 @app.get("/items")
 async def listar():
     conn = await get_conn()
@@ -41,7 +38,6 @@ async def listar():
     await conn.close()
     return [dict(r) for r in rows]
 
-# READ (Único) - GET /items/{id}
 @app.get("/items/{id}")
 async def buscar(id: int):
     conn = await get_conn()
@@ -50,7 +46,6 @@ async def buscar(id: int):
     if not row: raise HTTPException(status_code=404)
     return dict(row)
 
-# UPDATE - PUT /items/{id}
 @app.put("/items/{id}")
 async def atualizar(id: int, p: Paciente):
     conn = await get_conn()
@@ -59,7 +54,6 @@ async def atualizar(id: int, p: Paciente):
     await conn.close()
     return {"msg": "Atualizado!"}
 
-# DELETE - DELETE /items/{id}
 @app.delete("/items/{id}")
 async def deletar(id: int):
     conn = await get_conn()
